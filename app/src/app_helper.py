@@ -3,7 +3,7 @@ import os
 import pandas as pd
 
 def getVideoStream(video_path, filename, folder_path):
-    # 調用 OpenPose 處理影片
+    # 調用OpenPose處理影片
     openpose_cmd = [
         'openpose.bin',
         '--video', video_path,
