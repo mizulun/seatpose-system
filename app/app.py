@@ -14,7 +14,7 @@ app = Flask(__name__)
 #設置文件上傳目錄
 UPLOAD_FOLDER = './static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-# 添加一個secret key来啟用 Flask 的 flash 消息
+# 添加一個secret key来啟用Flask的flash消息
 app.secret_key = "super secret key" 
 
 @app.route("/")
