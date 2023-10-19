@@ -3,7 +3,7 @@ import json
 import csv
 
 # Directory containing the JSON files
-directory = 'C:/Users/Miley/openpose/build3/output/_test/nw'
+directory = 'C:/Users/Miley/Squat-Correction/json_output_folder'
 
 # List to store the extracted values
 data = []
