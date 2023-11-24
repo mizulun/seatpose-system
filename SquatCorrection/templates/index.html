@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>深蹲姿勢智慧調整輔助系統</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 20px 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .upload-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn {
+            border: 2px solid gray;
+            color: gray;
+            background-color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 20px;
+            margin-bottom: 50px; /* 調整這個值以改變按鈕之間的垂直間距 */
+            transition: background-color 0.3s, color 0.3s; /* 添加過渡效果 */
+        }
+
+        /* 鼠標懸停時的樣式 */
+        .upload-btn:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>深蹲姿勢智慧調整輔助系統</h1>
+    </div>
+    <div class="container">
+        <h2>選擇模式</h2>
+        <form action="realtime_analysis" method="GET">
+            <button class="btn upload-btn">即時深蹲姿勢判定矯正</button>
+        </form>
+        <form action="video_upload" method="GET">
+            <button class="btn upload-btn">影片深蹲姿勢判定矯正</button>
+        </form>
+    </div>
+</body>
+
+</html>
+
+
+
+
