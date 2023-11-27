@@ -1,3 +1,4 @@
+from asyncio import BoundedSemaphore
 import subprocess
 import os
 import time
@@ -7,7 +8,7 @@ import numpy as np
 import tensorflow.compat.v1 as tf
 from flask import Flask, request, Response, jsonify, send_from_directory, abort
 import os
-#from .config import shooting_result, previous, during_shooting, shooting_pose, shot_result
+from .config import squat_result
 import sys, logging
 from sys import platform
 import argparse
@@ -15,7 +16,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from .utils import tensorflow_init, openpose_init, json_to_csv
+from .utils import tensorflow_init, openpose_init, json_to_csv, detect_squat
 from statistics import mean
 import pandas as pd
 #from openpyxl import load_workbook
@@ -45,68 +46,76 @@ def getRealTimeStream():
 
     os.chdir(original_dir)
 
-def openposeAnalysis(video_path, video_name):
+def openposeAnalysis(video_path, filename, folder_path):
     # load model
     from keras.models import load_model
-    #cgan_model_path = os.path.join(os.getcwd(), "model_training/pix2pix_generator_v3.h5")
-    #cgan_model = load_model(cgan_model_path)
+    cgan_model_path = os.path.join(os.getcwd(), "model_training/pix2pix_generator_v5.h5")
+    cgan_model = load_model(cgan_model_path)
 
     lstm_model_path = os.path.join(os.getcwd(), "model_training/Model_9types_Squat_LSTM_final_v1.h5")
     lstm_model = load_model(lstm_model_path)
 
-    original_dir = os.getcwd()
-    openpose_dir = 'OpenPose'
-    os.chdir(openpose_dir)
+    squat_result['feet_distance']
+    SKIPS = 2
 
-    command = [
-        'build2\\x64\\Debug\\OpenPoseDemo.exe', '--video', '..\\static\\uploads\\' + video_name, '--write_json', '..\\static\\output\\json', 
-        '--keypoint_scale', '3', '--number_people_max', '1', '--write_video_with_audio', '..\\static\\output\\processed_videos\\output.mp4', 
-    ]
+    datum, opWrapper, op = openpose_init()
+    #detection_graph, image_tensor, boxes, scores, classes, num_detections = tensorflow_init()
 
+    fig = plt.figure()
+    #objects to store detection status
 
-    subprocess.run(command)
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    config.gpu_options.per_process_gpu_memory_fraction = 0.36
+    
+    print("Start getting data!!")
 
-    os.chdir(original_dir)
+    # Reading selected file
+    cap = cv2.VideoCapture(video_path)
+    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    trace = np.full((int(height), int(width), 3), 255, np.uint8)
 
-    json_to_csv()
+    # config printer
+    print("Image Size: {} x {}".format(width, height))
+    print("Frame per Second:",fps)
 
-    #Load csv
-    csv_path = 'static/output/csv/output.csv'
-    df = pd.read_csv(csv_path, header=None, encoding='gb2312', sep=',')
-    df = np.array(df)
-    df = df.reshape(df.shape[0], 32, 1)
+    # sample output as video
+        # note that the size must be accuracy
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    out = cv2.VideoWriter('static/output/'+str(filename), fourcc, float(fps), (int(width),  int(height)))
 
-    #Start predicting
-    predictions = np.argmax(lstm_model.predict(df), axis=-1)
-    most_common_prediction, count = np.unique(predictions, return_counts=True)
-    most_common_prediction = most_common_prediction[np.argmax(count)]
-    percentage = count[np.argmax(count)] / len(predictions) * 100
+    skip_count = 0
+    #with tf.Session(graph=detection_graph, config=config) as sess:
+    while True:
+        ret, img = cap.read()
+        if ret == False:
+            print("end of video")
+            break
+        skip_count += 1
+        if(skip_count < SKIPS):
+            continue
+        skip_count = 0
+        output_frame, prediction, feetDistance, kneeDistance = detect_squat(img, datum, opWrapper, op)
 
-    # Default values
-    feetDistance = "Unknown"
-    kneeDistance = "Unknown"
+        if (feetDistance != "Standard" or kneeDistance != "Standard"):
+            print('write image')
+            cv2.imwrite("C:\\Users\\USER\\SquatCorrection\\static\\output\\incorrect_images\\" + str(filename.split(".")[0]) + ".jpg", bones)
+            cv2.imwrite("C:\\Users\\USER\\SquatCorrection\\static\\detections\\origin.jpg", cv2.resize(output_frame, (int(width),  int(height))))
+            x = bones
 
-    # Determine feetDistance
-    if most_common_prediction in [0, 1, 2]:
-        feetDistance = "標準"
-    elif most_common_prediction in [3, 4, 5]:
-        feetDistance = "過窄"
-    elif most_common_prediction in [6, 7, 8]:
-        feetDistance = "過寬"
+        # sample output as video
+        video = cv2.resize(output_frame, (int(width),  int(height)))
+        # Add feetDistance and kneeDistance text to the video frame
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        text = f'Feet Distance: {feetDistance}  Knee Distance: {kneeDistance}'
+        cv2.putText(video, text, (10, 30), font, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-    # Determine kneeDistance
-    if most_common_prediction in [0, 3, 6]:
-        kneeDistance = "標準"
-    elif most_common_prediction in [1, 4, 7]:
-        kneeDistance = "過窄"
-    elif most_common_prediction in [2, 5, 8]:
-        kneeDistance = "過寬"
+        out.write(video)
 
-    print(predictions)
-    print(most_common_prediction)
-    print("Feet Distance:", feetDistance)
-    print("Knee Distance:", kneeDistance)
-    print("準確率： {:.2f}%".format(percentage))
-
-    return feetDistance, kneeDistance, percentage
+        prediction = cv2.resize(prediction, (0, 0), fx=0.83, fy=0.83)
+        frame = cv2.imencode('.jpg', video)[1].tobytes()
+        result = (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        yield result # output every frames to website by generator
 
