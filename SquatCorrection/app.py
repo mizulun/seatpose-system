@@ -47,23 +47,16 @@ def upload_video():
         session['video_path'] = filepath
         session['video_name'] = filename
         session['folder_path'] = app.config['UPLOAD_FOLDER']
-        feetDistance, kneeDistance, percentage = openposeAnalysis(filepath, filename)
-        return render_template("squat_analysis.html", feetDistance=feetDistance, kneeDistance=kneeDistance, percentage=percentage)
+        return render_template("squat_analysis.html")
 
 @app.route('/video_feed')
 def video_feed():
     video_path = session.get('video_path', None)
     video_name = session.get('video_name', None)
-    #feetDistance, kneeDistance, percentage = openposeAnalysis(video_path, video_name)
-
-    #response_data = {
-     #   'feetDistance': feetDistance,
-      #  'kneeDistance': kneeDistance,
-       # 'percentage': percentage
-    #}
-    #return response_data
-    #return Response(stream,
-                    #mimetype='multipart/x-mixed-replace; boundary=frame')
+    folder_path = session.get('folder_path', None)
+    stream = openposeAnalysis(video_path, video_name, folder_path)
+    return Response(stream,
+                    mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @app.route("/result", methods=['GET', 'POST'])
 def result():
