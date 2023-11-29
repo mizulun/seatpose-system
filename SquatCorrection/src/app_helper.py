@@ -16,35 +16,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
-from .utils import tensorflow_init, openpose_init, json_to_csv, detect_squat
+from .utils import tensorflow_init, openpose_init, detect_squat
 from statistics import mean
 import pandas as pd
 #from openpyxl import load_workbook
 import glob
-import json
-import csv
 tf.disable_v2_behavior()
-
-def getRealTimeStream():
-    # load model
-    from keras.models import load_model
-    #cgan_model_path = os.path.join(os.getcwd(), "model_training/pix2pix_generator_v3.h5")
-    #cgan_model = load_model(cgan_model_path)
-
-    lstm_model_path = os.path.join(os.getcwd(), "model_training/Model_9types_Squat_LSTM_final_v1.h5")
-    lstm_model = load_model(lstm_model_path)
-
-    original_dir = os.getcwd()
-    openpose_dir = 'OpenPose'
-    os.chdir(openpose_dir)
-
-    command = [
-        'build2\\x64\\Debug\\OpenPoseDemo.exe', '--flir_camera', '--3d', '--write_json', '..\\static\\output\\json', '--keypoint_scale', '3', '--number_people_max', '1'
-    ]
-
-    subprocess.run(command)
-
-    os.chdir(original_dir)
 
 def openposeAnalysis(video_path, filename, folder_path):
     # load model
