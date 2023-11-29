@@ -8,7 +8,6 @@ from werkzeug.utils import secure_filename
 from PIL import Image
 
 #from src.config import squat_result
-from src.app_helper import getRealTimeStream
 from src.app_helper import openposeAnalysis
 
 app = Flask(__name__)
@@ -22,16 +21,6 @@ app.secret_key = "super secret key"
 @app.route("/")
 def index():
     return render_template("index.html")
-
-@app.route('/video_upload', methods=['GET'])
-def video_upload():
-    return render_template("upload.html")
-
-@app.route('/realtime_analysis', methods=['GET'])
-def realtime():
-    stream = getRealTimeStream()
-    return Response(stream, content_type='multipart/x-mixed-replace; boundary=frame')
-    
 
 @app.route('/squat-correction', methods=['GET', 'POST'])
 def upload_video():
