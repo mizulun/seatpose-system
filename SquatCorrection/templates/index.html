@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,13 +12,11 @@
             margin: 0;
             padding: 0;
         }
-
         .header {
             background-color: #333;
             color: white;
             padding: 20px 0;
         }
-
         .container {
             max-width: 800px;
             margin: 0 auto;
@@ -28,24 +25,20 @@
             border-radius: 10px;
             box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
         }
-
         h1 {
             font-size: 36px;
             margin-bottom: 20px;
         }
-
         .upload-form {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .upload-btn-wrapper {
             position: relative;
             overflow: hidden;
             display: inline-block;
         }
-
         .btn {
             border: 2px solid gray;
             color: gray;
@@ -53,33 +46,59 @@
             padding: 8px 20px;
             border-radius: 8px;
             font-size: 20px;
-            margin-bottom: 50px; /* 調整這個值以改變按鈕之間的垂直間距 */
             transition: background-color 0.3s, color 0.3s; /* 添加過渡效果 */
         }
-
-        /* 鼠標懸停時的樣式 */
-        .upload-btn:hover {
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer; /* 添加 cursor 屬性，顯示為手型 */
+        }
+        .btn:hover {
             background-color: #0056b3;
             color: white;
         }
     </style>
 </head>
-
 <body>
     <div class="header">
         <h1>深蹲姿勢智慧調整輔助系統</h1>
     </div>
     <div class="container">
-        <h2>選擇模式</h2>
-        <form action="realtime_analysis" method="GET">
-            <button class="btn upload-btn">即時深蹲姿勢判定矯正</button>
-        </form>
-        <form action="video_upload" method="GET">
-            <button class="btn upload-btn">影片深蹲姿勢判定矯正</button>
+        <form class="upload-form" action="squat-correction" method="POST" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <h1>選擇您的影片</h1>
+            <div class="upload-btn-wrapper">
+                <button class="btn upload-btn">選擇檔案</button>
+                <input type="file" name="video" accept="video/*" id="video-input" required>
+            </div>
+            <br>
+            <p id="file-name"></p>
+            <button class="btn upload-btn" type="submit">上傳</button>
         </form>
     </div>
-</body>
+    
+    <script>
+        const videoInput = document.getElementById('video-input');
+        const fileName = document.getElementById('file-name');
 
+        videoInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileName.textContent = '已選擇文件: ' + file.name;
+            }
+        });
+
+        function validateForm() {
+            if (videoInput.files.length === 0) {
+                alert("請選擇文件");
+                return false;
+            }
+            return true;
+        }
+    </script>
+</body>
 </html>
 
 

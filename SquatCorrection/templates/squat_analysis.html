@@ -121,21 +121,12 @@
     <div class="container">
         <h2>姿勢判定結果</h2>
         <div class="video-container">
-            <video width="640" height="480" controls>
-                <source src="/static/output/processed_videos/output.mp4" type="video/avi">
-                Your browser does not support the video tag.
-            </video>
+            <img src="{{ url_for('video_feed') }}">
         </div>
     </div>
     
         <div class="legend-container">
             <div class="legend" style="display: flex; flex-direction: column;">
-                <div class="color-legend" style="margin-bottom: 10px;">
-                    <h3 style="white-space: nowrap; margin: 0;">雙腳距離: {{ feetDistance }}</h3>
-                </div>
-                <div class="color-legend" style="margin-bottom: 10px;">
-                    <h3 style="white-space: nowrap; margin: 0;">膝蓋距離: {{ kneeDistance }}</h3>   
-                </div>
                 <div class="color-legend">
                     <h3 style="white-space: nowrap; margin: 0;">準確率: {{ percentage }}%</h3>
                 </div>
